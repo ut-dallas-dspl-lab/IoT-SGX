@@ -18,7 +18,8 @@ Later, the SGX enclave receives encrypted trigger events from IoT devices, proce
 # Installation #
 1. Install Intel SGX SDK. For more information, see [SGX SDK linux documentation](https://github.com/intel/linux-sgx).
 2. Install required packages mentioned above.
-2. Clone this repo in the project's source folder.
+3. Clone this repo in the project's source folder.
+4. You may need to update the **Makefile** to include necessary library information/path.
 
 
 # Build and Run #
