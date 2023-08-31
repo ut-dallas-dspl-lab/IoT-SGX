@@ -1,0 +1,10 @@
+global-incdirs-y += include
+srcs-y += main_TA.c
+srcs-y += device_manager_TA.c
+srcs-y += cJSON_TA.c
+srcs-y += parser_TA.c
+srcs-y += utils_TA.c
+srcs-y += device_motion_sensor_TA.c
+srcs-y += device_temp_sensor_TA.c
+srcs-y += device_switch_TA.c
+#srcs-y += $(wildcard *.c)

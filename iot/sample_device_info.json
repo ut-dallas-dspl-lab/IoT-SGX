@@ -1,0 +1,32 @@
+{
+	"userID": "user123456",
+	"devices": [
+		{
+			"deviceID": "sM6OJEsM2R2g2tpSrq8JB8QHwcqzGh6j",
+			"locationID": "loc123456",
+			"capability": "motionSensor",
+			"attribute": "motion",
+			"unit": "",
+			"topic": "utd/cs/dsplab/iotsgx/pub/motionsensor",
+			"pub/sub": "publish"
+		},
+		{
+			"deviceID": "xXFrM3c49S1h1613t6u3GxrDP7yfUcXP",
+			"locationID": "loc456789",
+			"capability": "led",
+			"attribute": "led",
+			"unit": "",
+			"topic": "utd/cs/dsplab/iotsgx/sub/led",
+			"pub/sub": "subscribe"
+		},
+		{
+			"deviceID": "Q7u6gui1zaXmFgCBUs3mPGuxsvh84jtm",
+			"locationID": "loc789123",
+			"capability": "temperatureSensor",
+			"attribute": "temperature",
+			"unit": "F",
+			"topic": "utd/cs/dsplab/iotsgx/pub/tempsensor",
+			"pub/sub": "publish"
+		}
+	]
+}

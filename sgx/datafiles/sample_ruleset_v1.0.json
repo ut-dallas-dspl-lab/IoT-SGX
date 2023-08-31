@@ -1,0 +1,135 @@
+[
+	{
+    "name": "If motion detected, Turn on the LED light",
+    "ruleID": "qIibny6eS0I6",
+    "userID": "user123456",
+    "actions": [
+      {
+        "if": {
+          "equals": {
+            "left": {
+              "device": {
+                "devices": [
+                  "sM6OJEsM2R2g2tpSrq8JB8QHwcqzGh6j"
+                ],
+                "component": "main",
+                "capability": "motionSensor",
+                "attribute": "motion"
+              }
+            },
+            "right": {
+              "string": "active"
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [
+                  "xXFrM3c49S1h1613t6u3GxrDP7yfUcXP"
+                ],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "led",
+                    "command": "on",
+                    "arguments": [
+                      {
+                        "wait": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "If temperature is less than 50 F, Turn on the LED light",
+    "ruleID": "waVlh8UxhPOn",
+    "userID": "user123456",
+    "actions": [
+      {
+        "if": {
+          "less_than": {
+            "left": {
+              "integer": 50
+            },
+            "right": {
+              "device": {
+                "devices": [
+                  "Q7u6gui1zaXmFgCBUs3mPGuxsvh84jtm"
+                ],
+                "component": "main",
+                "capability": "temperatureMeasurement",
+                "attribute": "temperature"
+              }
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [
+                  "xXFrM3c49S1h1613t6u3GxrDP7yfUcXP"
+                ],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "led",
+                    "command": "on",
+                    "arguments": []
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "If temperature is greater than 80 F, Turn off the LED light",
+    "ruleID": "yaGlh7UxhBOm",
+    "userID": "user123456",
+    "actions": [
+      {
+        "if": {
+          "greater_than": {
+            "left": {
+              "integer": 80
+            },
+            "right": {
+              "device": {
+                "devices": [
+                  "Q7u6gui1zaXmFgCBUs3mPGuxsvh84jtm"
+                ],
+                "component": "main",
+                "capability": "temperatureMeasurement",
+                "attribute": "temperature"
+              }
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [
+                  "xXFrM3c49S1h1613t6u3GxrDP7yfUcXP"
+                ],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "led",
+                    "command": "off",
+                    "arguments": []
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

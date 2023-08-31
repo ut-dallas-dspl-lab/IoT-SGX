@@ -1,0 +1,7 @@
+/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug/CMakeFiles/optee_example_iot.dir
+/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug/CMakeFiles/list_install_components.dir
+/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug/CMakeFiles/install.dir
+/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug/CMakeFiles/install/local.dir
+/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug/CMakeFiles/install/strip.dir
