@@ -6,7 +6,7 @@ Later, the SGX enclave receives encrypted trigger events from IoT devices, proce
 
 ## Required libraries/packages
 - Mosquitto
-- JsonCpp, cJSON (included)
+- JsonCpp, cJSON (included), cppcodec (included)
 - MongoDB, mongocxx driver, bsoncxx driver
 
 
