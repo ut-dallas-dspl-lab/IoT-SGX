@@ -6,8 +6,8 @@ Later, the SGX enclave receives encrypted trigger events from IoT devices, proce
 
 ## Required libraries/packages
 - Mosquitto
-- cJSON
-- MongoDB, mongocxx driver
+- JsonCpp, cJSON (included)
+- MongoDB, mongocxx driver, bsoncxx driver
 
 
 ## Software versions used for test cases
@@ -24,12 +24,24 @@ Later, the SGX enclave receives encrypted trigger events from IoT devices, proce
 # Build and Run #
 1. Make sure your environment is set: $ source ${sgx-sdk-install-path}/environment
 2. Build the project with the prepared Makefile:
-    a. Hardware Mode, Debug build: $ make
-    b. Hardware Mode, Pre-release build: $ make SGX_PRERELEASE=1 SGX_DEBUG=0
-    c. Hardware Mode, Release build: $ make SGX_DEBUG=0
-    d. Simulation Mode, Debug build: $ make SGX_MODE=SIM
-    e. Simulation Mode, Pre-release build: $ make SGX_MODE=SIM SGX_PRERELEASE=1 SGX_DEBUG=0
-    f. Simulation Mode, Release build: $ make SGX_MODE=SIM SGX_DEBUG=0
+    - Hardware Mode, Debug build: $ make
+    - Simulation Mode, Debug build: $ make SGX_MODE=SIM
 3. Execute the binary directly: $ ./app <argument lists>
 4. Remember to "make clean" before switching build mode or after updating Enclave.edl file.
 5. Argument list:
+   1. MongoDB collection name (required)
+   2. json file path containing device information (required)
+   3. Optional arguments: see the `App.c` for more information
+
+
+## Example Run of the Sample Code:
+
+1.  First, follow the `sample_device_info.json` in the *datafiles* folder that contains necessary IoT device information.
+    - user information (e.g., user id) 
+	- necessary device information for each device (e.g., device id, capability, attribute, value unit, topic for pub/sub)
+3. Second, you need to register the rules in SGX.
+    - Follow the `sample_ruleset_v1.0.json` file. It contains a list of rules in trigger-action format in json.
+    - Load the sample encrypted ruleset from file `sample_ruleset_v1_enc.json` into the MongoDB using *mongoimport* command:
+      `mongoimport --db=IOT --collection=sample_ruleset_v1 --file=sample_ruleset_v1_enc.json`
+4. Lastly, run the SGX app that awaits for incoming trigger-events from registered IoT devices:
+    - Run using command: `./app sample_ruleset_v1 sample_device_info.json -r 0 -d 1`
