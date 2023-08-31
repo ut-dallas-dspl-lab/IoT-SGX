@@ -23,12 +23,12 @@ Later, the SGX enclave receives encrypted trigger events from IoT devices, proce
 
 
 # Build and Run #
-1. Make sure your environment is set: $ source ${sgx-sdk-install-path}/environment
+1. Make sure your environment is set: *$ source ${sgx-sdk-install-path}/environment*
 2. Build the project with the prepared Makefile:
-    - Hardware Mode, Debug build: $ make
-    - Simulation Mode, Debug build: $ make SGX_MODE=SIM
-3. Execute the binary directly: $ ./app <argument lists>
-4. Remember to "make clean" before switching build mode or after updating Enclave.edl file.
+    - Hardware Mode, Debug build: *$ make*
+    - Simulation Mode, Debug build: *$ make SGX_MODE=SIM*
+3. Execute the binary directly: *$ ./app <argument lists>*
+4. Remember to `make clean` before switching build mode or after updating `Enclave.edl` file.
 5. Argument list:
    1. MongoDB collection name (required)
    2. json file path containing device information (required)
