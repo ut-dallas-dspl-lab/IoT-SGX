@@ -190,7 +190,7 @@ int MongoManager::retrieveRuleCount(DatabaseElement *element){
 }
 
 /*
- * Retrieve rule info (e.g., rule size) from MongoDB collection following a query
+ * Retrieve rule info (e.g., count, rule size) from MongoDB collection following a query
  * @param element: DatabaseElement struct that contains the query and stores the info after fetching from DB
  * @param count: total number of rules from retrieveRuleCount()
  */
@@ -260,11 +260,6 @@ bool MongoManager::retrieveRuleInfo(DatabaseElement *element, size_t numRules){
 
             element->data->isEncrypted = is_encrypted;
             if (is_encrypted){
-//                if(!parse_data_length_with_tag((char*)data.c_str(), element->data)){
-//                    printf("MongoManager:: parsing failed!\n");
-//                    isSuccess = false;
-//                    break;
-//                }
                 element->data->textLength = get_decoded_message_length((char *)data.c_str());
             }else{
                 element->data->textLength = data.length();
@@ -357,17 +352,13 @@ bool MongoManager::retrieveRule(DatabaseElement *element, size_t numRules){
             }
 
             element->data->isEncrypted = is_encrypted;
+            element->data->textLength = element->data->isEncrypted ? get_decoded_message_length((char *)data.c_str()) : data.length();
+            element->data->text = (char*) malloc(element->data->textLength * sizeof(char));
             if(is_encrypted == 1){
-//                if(!parse_data_with_tag((char*)data.c_str(), element->data, false)){
-//                    printf("MongoManager:: parsing failed!\n");
-//                    isSuccess = false;
-//                    break;
-//                }
                 decode_message((char *)data.c_str(), element->data->text);
-                element->data->textLength = get_decoded_message_length((char *)data.c_str());
             }else{
-                memcpy(element->data->text, (char *)data.c_str(), data.length());
-                element->data->text[data.length()] = '\0';
+                memcpy(element->data->text, (char *)data.c_str(), element->data->textLength);
+                element->data->text[element->data->textLength] = '\0';
             }
             //printf("MongoManager:: data_len = %d\n", element->data->textLength);
             count++;

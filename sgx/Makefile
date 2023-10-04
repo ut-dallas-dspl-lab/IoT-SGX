@@ -82,7 +82,7 @@ else
 endif
 
 App_Cpp_Files := $(wildcard App/*.cpp) $(wildcard cppcodec/*.cpp)  $(wildcard App/Edger8rSyntax/*.cpp) $(wildcard App/TrustedLibrary/*.cpp)
-App_Include_Paths := -IInclude -IApp -Icppcodec -I$(SGX_SDK)/include -I/usr/local/include/mongocxx/v_noabi -I/usr/local/include/bsoncxx/v_noabi -I/snap/mosquitto/776/usr/include
+App_Include_Paths := -IInclude -IApp -Icppcodec -I$(SGX_SDK)/include -I/usr/local/include/mongocxx/v_noabi -I/usr/local/include/bsoncxx/v_noabi -I/snap/mosquitto/831/usr/include
 
 App_C_Flags := -fPIC -Wno-attributes $(App_Include_Paths)
 
@@ -99,8 +99,9 @@ else
 endif
 
 App_Cpp_Flags := $(App_C_Flags)
-#App_Link_Flags += -Wl,-rpath,-L/usr/local/lib/libmongocxx.so._noabi -L/snap/mosquitto/776/usr/lib -lmosquitto
-App_Link_Flags := -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -L/usr/local/lib -lmongocxx -lbsoncxx -lcurl -ljsoncpp -lssl -lcrypto -lpthread -lboost_date_time -lboost_system -lboost_thread -lmosquitto
+#App_Link_Flags += -Wl,-rpath,-L/usr/local/lib/libmongocxx.so._noabi -L/snap/mosquitto/831/usr/lib -lmosquitto
+App_Link_Flags := -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -L/usr/local/lib -lmongocxx -lbsoncxx -lcurl -ljsoncpp -lssl -lcrypto -lpthread -lboost_date_time -lboost_system -lboost_thread -L/snap/mosquitto/831/usr/lib -lmosquitto # check the snap for proper directory
+# App_Link_Flags := -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -L/usr/local/lib -lmongocxx -lbsoncxx -lcurl -ljsoncpp -lssl -lcrypto -lpthread -lboost_date_time -lboost_system -lboost_thread -lmosquitto
 
 ifneq ($(SGX_MODE), HW)
 	App_Link_Flags += -lsgx_uae_service_sim
@@ -108,7 +109,6 @@ else
 	App_Link_Flags += -lsgx_uae_service
 endif
 
-#edited by shihab
 PYTHON_LIBRARY_PATH := $(SGX_SDK)/../anaconda3/include/python2.7
 App_Link_Flags += -L$(PYTHON_LIBRARY_PATH) -lpython2.7
 

@@ -72,6 +72,7 @@ struct Message {
     size_t isEncrypted;
 
     char *address;
+    long timestamp;
 };
 
 /* Specific Rule properties */

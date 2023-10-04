@@ -44,7 +44,6 @@ public:
     int retrieveRuleCount(DatabaseElement *element);
     bool retrieveRuleInfo(DatabaseElement *element, size_t numRules);
     bool retrieveRule(DatabaseElement *element, size_t numRules);
-
 };
 
 

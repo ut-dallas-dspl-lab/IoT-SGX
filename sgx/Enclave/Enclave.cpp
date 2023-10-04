@@ -37,7 +37,6 @@
 #include <string.h>
 #include "EnclaveManager.h"
 #include "EnclaveHelper.h"
-//#include "TimerQueueManager.h"
 #include "ControlFlowManager.h"
 
 //#include "sgx_tae_service.h"
@@ -84,6 +83,7 @@ size_t ocallGetCurrentTime(int timeUnit){
 void ecall_initialize_enclave(int isDebug, int isBenchmark){
     IS_DEBUG = isDebug;
     IS_BENCHMARK = isBenchmark;
+
     /* plug-in other properties */
 
     setupEnclave();

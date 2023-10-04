@@ -168,6 +168,7 @@ bool parseRuleForActionList(const cJSON *actions, Rule *myrule, RuleComponent *a
         bool isResponseParsed = false;
         cJSON *monitor = cJSON_CreateObject();
         bool isValid = cJSON_AddItemToObject(monitor, RULE_KEY_COMMANDS, cJSON_GetObjectItemCaseSensitive(commandJson, RULE_KEY_COMMANDS));
+        //bool isValid = cJSON_AddItemToObject(monitor, RULE_KEY_COMMAND, cJSON_GetObjectItemCaseSensitive(action, RULE_KEY_COMMAND));
         char *str = isValid ? cJSON_Print(monitor) : NULL;
         isResponseParsed = TEE_malloc(isElse ? &myrule->responseCommandElse :  &myrule->responseCommand, str, strlen(str));
         cJSON_free(str);
@@ -373,12 +374,149 @@ bool parseDeviceEventData(char *event, DeviceEvent *deviceEvent){
     isValid = !cJSON_IsNull(timestampObj) && cJSON_IsString(timestampObj) && (timestampObj->valuestring != NULL);
     isTimestampParsed = isValid && TEE_malloc(&deviceEvent->timestamp, timestampObj->valuestring, strlen(timestampObj->valuestring));
 
-    // not counting Timestamp for now...
-    bool isParseSuccess = isDeviceIDParsed && isCapabilityParsed && isAttributeParsed && isValueParsed && isUnitParsed;
-    if (IS_DEBUG && !isParseSuccess) printf("RuleManager:: Event parsing failed ");
+
+    bool isParseSuccess = isDeviceIDParsed && isCapabilityParsed && isAttributeParsed && isValueParsed && isUnitParsed && isTimestampParsed;
+    if (IS_DEBUG && !isParseSuccess) printf("RuleManager:: Event parsing failed!");
 
     cJSON_Delete(event_json);
     return isParseSuccess;
+}
+
+/*
+ * buildActionCommand:
+ *  Build a json string from the action command properties.
+ *  @params: user ID, device ID, action command string
+ *  returns: json string if successful, else NULL
+ */
+char* buildActionCommand(char *userID, char *deviceID, char *command){
+    /* Create a cJSON Object */
+    cJSON *monitor_json = cJSON_CreateObject();
+    if (monitor_json == NULL){
+        printf("Parser:: Failed to create cJSON Object.");
+        return NULL;
+    }
+
+    /* Add User ID */
+    if(cJSON_AddStringToObject(monitor_json, DEVICE_KEY_USERID, userID) == NULL){
+        printf("Parser:: Failed to add device id.");
+        cJSON_Delete(monitor_json);
+        return NULL;
+    }
+
+    /* Add Device ID */
+    cJSON *deviceID_array = cJSON_CreateArray();
+    cJSON *deviceID_json = cJSON_CreateString(deviceID);
+    if (deviceID_array == NULL || deviceID_json == NULL){
+        printf("Parser:: Failed to create device id properties.");
+        cJSON_Delete(monitor_json);
+        return NULL;
+    }
+
+    if(cJSON_AddItemToArray(deviceID_array, deviceID_json) == NULL){
+        printf("Parser:: Failed to add device id to array.");
+        cJSON_Delete(monitor_json);
+        return NULL;
+    }
+
+    if(cJSON_AddItemToObject(monitor_json, DEVICE_KEY_DEVICES, deviceID_array) == NULL){
+        printf("Parser:: Failed to add device id array to json.");
+        cJSON_Delete(monitor_json);
+        return NULL;
+    }
+
+    /* Add Timestamp */
+    size_t ts = ocallGetCurrentTime(SECOND);
+    char ts_buffer[16];
+    snprintf(ts_buffer,16, "%ld", ts);
+    cJSON *ts_json = cJSON_CreateString(ts_buffer);
+    if (ts_json == NULL){
+        printf("Parser:: Failed to create timestamp properties.");
+        cJSON_Delete(monitor_json);
+        return NULL;
+    }
+
+    if(cJSON_AddItemToObject(monitor_json, "ts", ts_json) == NULL){
+        printf("Parser:: Failed to add timestamp.");
+        cJSON_Delete(monitor_json);
+        return NULL;
+    }
+
+    /* Add Action command */
+    cJSON *command_json = cJSON_Parse(command);
+    if (command_json == NULL){
+        printf("Parser:: Failed to create cJSON Object from command string");
+        return NULL;
+    }
+
+    cJSON *cmd = cJSON_GetObjectItem(command_json, RULE_KEY_COMMANDS);
+    if (!cJSON_IsArray(cmd) || cJSON_IsNull(cmd)){
+        printf("Parser:: couldn't parse cmd!");
+        cJSON_Delete(command_json);
+        return NULL;
+    }
+
+    /* straight-forward, but issue with number format in TZ side of cjson */
+//    if(cJSON_AddItemToObject(monitor_json, RULE_KEY_COMMANDS, cmd) == NULL){
+//        printf("Parser:: Failed to add command.");
+//        cJSON_Delete(monitor_json);
+//        cJSON_Delete(command_json);
+//        return NULL;
+//    }
+
+    cJSON *commands_array = cJSON_CreateArray();
+    if(cJSON_AddItemToObject(monitor_json, RULE_KEY_COMMANDS, commands_array) == NULL){
+        printf("Parser:: Failed to add commands array.");
+        cJSON_Delete(monitor_json);
+        cJSON_Delete(command_json);
+        return NULL;
+    }
+
+    const cJSON *obj = NULL;
+    cJSON_ArrayForEach(obj, cmd)
+    {
+        cJSON *element = cJSON_CreateObject();
+        cJSON_AddItemToArray(commands_array, element);
+
+        cJSON_AddStringToObject(element, "component", "main");
+
+        const cJSON *capability = cJSON_GetObjectItem(obj, RULE_KEY_CAPABILITY);
+        cJSON_AddStringToObject(element, RULE_KEY_CAPABILITY, capability->valuestring);
+
+        const cJSON *ac_cmd = cJSON_GetObjectItem(obj, RULE_KEY_COMMAND);
+        cJSON_AddStringToObject(element, RULE_KEY_COMMAND, ac_cmd->valuestring);
+
+        const cJSON *arguments = cJSON_GetObjectItem(obj, RULE_KEY_ARGUMENTS);
+
+        cJSON *args_array = cJSON_CreateArray();
+        cJSON_AddItemToObject(element, RULE_KEY_ARGUMENTS, args_array);
+
+        int numArgs = cJSON_IsArray(arguments) ? cJSON_GetArraySize(arguments) : 0;
+        for (int i = 0 ; i < numArgs ; i++){
+            const cJSON *arg = cJSON_GetArrayItem(arguments, i)->child;
+            cJSON *arg_obj = cJSON_CreateObject();
+            cJSON_AddItemToArray(args_array, arg_obj);
+
+            if (cJSON_IsString(arg) && (arg->valuestring != NULL)){
+                cJSON_AddStringToObject(arg_obj, arg->string, arg->valuestring);
+            }else{
+                char int_buffer[8];
+                snprintf(int_buffer, 8, "%d", arg->valueint);
+                cJSON_AddStringToObject(arg_obj, arg->string, int_buffer);
+            }
+        }
+    }
+
+
+    char *string = cJSON_Print(monitor_json);
+    if (string == NULL){
+        printf("Parser:: Failed to create string");
+    }
+    //printf("string = %s", string);
+
+    //cJSON_Delete(command_json);
+    cJSON_Delete(monitor_json);
+
+    return string;
 }
 
 

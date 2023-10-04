@@ -6,13 +6,14 @@
 #include "RuleConflictDetectionManager.h"
 #include "EnclaveDatabaseManager.h"
 #include "ObliviousOperationManager.h"
+#include "EnclaveManager.h"
 
 
 /******************************************************/
 /* Rule Parsing */
 /******************************************************/
 
-/*
+/**
  * startParsingRule:
  *  Parse the decrypted rule string and make a Struct Rule
  *  @params: decrypted rule string, Struct Rule
@@ -38,7 +39,7 @@ bool startParsingRule(char *ruleString, Rule *myRule){
 /* Rule Operation */
 /******************************************************/
 
-/*
+/**
  * startRuleConflictDetection:
  *  returns false if there's no conflict, else return true.
  */
@@ -48,7 +49,7 @@ bool startRuleConflictDetection(Rule *myRule){
     return ret;
 }
 
-/*
+/**
  * checkRuleSatisfiability:
  *  if the device event matches the trigger properties of a Rule, then the rule is satisfied
  *  @params: an incoming device event, a Rule fetched from DB
@@ -94,7 +95,7 @@ bool checkRuleSatisfiability(DeviceEvent *myEvent, Rule *myRule){
     return is_satisfied;
 }
 
-/*
+/**
  * startRuleAutomation:
  *  Check if an incoming device event satisfies any rule stored in the DB.
  *  @params: device event
@@ -116,7 +117,7 @@ bool startRuleAutomation(DeviceEvent *myEvent){
         bool ret = obliviousAndOperation(isSuccess, checkRuleSatisfiability(myEvent, ruleset[i]));
 
         //Assuming dummy rules already contain dummy device id
-        sendRuleCommands(ruleset[i], ret);
+        sendDeviceCommands(ruleset[i], ret);
     }
 
     if (IS_DEBUG){
@@ -126,42 +127,6 @@ bool startRuleAutomation(DeviceEvent *myEvent){
 
     return isSuccess;
 }
-
-/*
- * sendRuleCommands:
- *  sends action-commands to respective devices according to the Action part of the Rule
- *  @params: a Rule, a boolean indicating whether the rule is satisfied
- *  returns: true if command sent successfully, else false
- */
-bool sendRuleCommands(Rule *myRule, bool isRuleSatisfied){
-    TOTAL_DEVICE_COMMANDS += 1;
-    if (IS_DEBUG) printf("isRuleSatisfied = %d", isRuleSatisfied);
-
-    /* check if there is any 'else' response in the Rule */
-    bool isEmptyResponse = obliviousSelectEq(isRuleSatisfied, 0) && obliviousSelectEq(myRule->isElseExist, 0);
-    if (isEmptyResponse) return isRuleSatisfied;
-
-    Message *response = (Message*) malloc(sizeof(Message));
-    response->isEncrypted = IS_ENCRYPTION_ENABLED;
-
-    response->address = obliviousSelectEq(isRuleSatisfied, 1) ? myRule->action->deviceID : myRule->actionElse->deviceID;
-    char *responseCommand = obliviousSelectEq(isRuleSatisfied, 1) ? myRule->responseCommand : myRule->responseCommandElse;
-    int len = obliviousStringLength(responseCommand);
-    if (IS_DEBUG) printf("responseCommand = %s", responseCommand);
-
-    response->textLength = len+SGX_AESGCM_MAC_SIZE;
-    response->text = (char *) malloc(sizeof(char) * (response->textLength+1));
-    response->tag = NULL;
-    bool isEncryptionSuccess = encryptMessage_AES_GCM(responseCommand, len, response->text, response->textLength);
-
-    size_t isSuccess = 0;
-    if (obliviousSelectEq(isEncryptionSuccess,1)) ocall_send_rule_commands_mqtt(&isSuccess, response->address, response->text, response->textLength); /* pass the response to the REE via ocall */
-    if (IS_DEBUG) isSuccess ? printf("RuleManager:: Successfully sent rule command to device!") : printf("RuleManager:: Failed to send rule command to device!");
-
-    deleteMessage(&response);
-    return isSuccess;
-}
-
 
 /******************************************************/
 /* Dummy Rule Generation */

@@ -1,0 +1,2 @@
+Database name: sample_ruleset_v1
+Device info filename: datafiles/sample_device_info.json

@@ -85,7 +85,7 @@ enclave {
 
         size_t ocall_read_rule_count([in, string] char *pk, [in, string] char *sk, size_t queryType);
         size_t ocall_read_rule_info([in, string] char *pk, [in, string] char *sk, size_t queryType, [in, out, count=count] int* rule_size_list, size_t count);
-        size_t ocall_read_rule([in, string] char *pk, [in, string] char *sk, size_t queryType, [in, out, count=count] struct Message *data, size_t count);
+        size_t ocall_read_rule([in, string] char *pk, [in, string] char *sk, size_t queryType, [in, out, size=len] char *data, size_t len, size_t count);
 
         size_t ocall_send_rule_commands_mqtt([in, string] char *topic, [in, string] char *actionCommand, int commandLength);
 

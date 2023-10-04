@@ -198,6 +198,7 @@ int received_trigger_events(char *buffer, int buffer_len){
     msg->text = (char *) malloc((buffer_len+1)*sizeof(char));
     msg->textLength = buffer_len;
     msg->tag = NULL;
+    msg->timestamp = getCurrentTime(SECOND);
 
     memcpy(msg->text, buffer, msg->textLength);
     msg->text[msg->textLength] = '\0';
@@ -369,20 +370,34 @@ size_t ocall_read_rule_info(char *pk, char *sk, size_t queryType, int* rule_size
     return returnValue == true? 1:0;
 }
 
-size_t ocall_read_rule(char *pk, char *sk, size_t queryType, struct Message *data, size_t count){
+size_t ocall_read_rule(char *pk, char *sk, size_t queryType, char *data, size_t length, size_t ruleCount){
     if (IS_DEBUG) printf("ocall_read_rule\n");
     DatabaseElement *dbElement = (DatabaseElement*) malloc(sizeof(DatabaseElement));
     dbElement->deviceID = pk;
     dbElement->attribute = sk;
     dbElement->queryType = static_cast<DBQueryType>(queryType);
-    dbElement->data = data;
+    dbElement->data = (Message*) malloc(ruleCount * sizeof(Message));;
 
     Message *startPos = dbElement->data;
-    bool returnValue = mongoObj->retrieveRule(dbElement, count);
+    bool returnValue = mongoObj->retrieveRule(dbElement, ruleCount);
+
     dbElement->data = startPos;
+    int total_len = 0;
+    if(returnValue){
+        for (int i = 0; i < ruleCount; ++i) {
+            memcpy(data + total_len, dbElement->data->text, dbElement->data->textLength);
+            total_len += dbElement->data->textLength;
+            dbElement->data++;
+        }
+        data[total_len] = '\0';
+        if(length != total_len) printf("\nAPP:: Error! length mismatch!\n");
+    }
+
+    dbElement->data = startPos;
+    free(dbElement->data);
     free(dbElement);
 
-    return returnValue == true? 1:0;
+    return returnValue & total_len == length ? 1:0;
 }
 
 size_t ocall_send_rule_commands_mqtt(char *topic, char *actionCommand, int commandLength){

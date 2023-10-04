@@ -63,9 +63,9 @@ bool storeRuleInDB(char *ruleString, Rule *myrule){
  *  @params: ruleset = vector to hold the retrieved rules; ruleCount = number of rules to retrieve; primaryKey = secondaryKey = query parameters; queryType = enum to represent the type of query
  *  returns: true if successful, else false
  */
-
 bool retrieveRulesFromDB(std::vector<Rule*>&ruleset, size_t ruleCount, char *primaryKey, char *secondaryKey, DBQueryType queryType) {
     if (IS_DEBUG) printf("EnclaveDatabaseManager:: retrieveRulesFromDB...");
+
     if (ruleCount <= 0){
         /*  fetch rule count */
         ruleCount = 0;
@@ -76,6 +76,7 @@ bool retrieveRulesFromDB(std::vector<Rule*>&ruleset, size_t ruleCount, char *pri
         }
         if (IS_DEBUG) printf("EnclaveDatabaseManager:: Rule Count = %d", ruleCount);
     }
+
 
     /*  fetch rule info such as rule size */
     int *rule_size_list = (int*) malloc(ruleCount * sizeof(int));
@@ -88,22 +89,30 @@ bool retrieveRulesFromDB(std::vector<Rule*>&ruleset, size_t ruleCount, char *pri
         return false;
     }
 
+
     /*  initialize structs Message */
     Message* data = (Message*) malloc(ruleCount * sizeof(Message));
     Message* startPos = data;
+
+    int ruleSize = 0;
     int count = 0;
     for(int i=0; i<ruleCount; i++){
-        //printf("rule_size_list= %d", rule_size_list[i]);
         data->isEncrypted = 1;
         data->textLength = rule_size_list[i];
         data->text = (char *) malloc(sizeof(char) * (data->textLength+1));
+
+        ruleSize += data->textLength;
         count++;
         if(count != ruleCount) data++;
     }
+    if (IS_DEBUG) printf("EnclaveDatabaseManager:: Rule Size = %d", ruleSize);
+
 
     /* Fetch rules */
+    char *data_strings = (char*) malloc((ruleSize+1) * sizeof(char));
     data = startPos;
-    ocall_read_rule(&isRetrieved, primaryKey, secondaryKey, queryType, data, ruleCount);
+    ocall_read_rule(&isRetrieved, primaryKey, secondaryKey, queryType, data_strings, ruleSize, ruleCount);
+
     if(isRetrieved == 0){
         if (IS_DEBUG) printf("EnclaveDatabaseManager:: Failed to fetch rules!");
         /* cleanup */
@@ -115,10 +124,25 @@ bool retrieveRulesFromDB(std::vector<Rule*>&ruleset, size_t ruleCount, char *pri
             if(count != ruleCount) data++;
         }
         data = startPos;
+        free(data_strings);
         free(data);
         free(rule_size_list);
         return false;
     }
+
+    data = startPos;
+    int total_len = 0;
+    for(int i=0; i<ruleCount; i++){
+        memcpy(data->text, data_strings + total_len, data->textLength);
+        data->text[data->textLength] = '\0';
+
+        total_len += data->textLength;
+        count++;
+        if(count != ruleCount) data++;
+    }
+    free(data_strings);
+    free(rule_size_list);
+
 
     /* Shuffling */
     data = startPos;
@@ -150,8 +174,6 @@ bool retrieveRulesFromDB(std::vector<Rule*>&ruleset, size_t ruleCount, char *pri
         initRule(&myrule);
 
         bool isParsed = isDecryptSuccess && startParsingRule(ruleString, myrule);
-        if (IS_DEBUG && isParsed) printRuleInfo(myrule);
-
         isParsed ? ruleset.push_back(myrule) : deleteRule(&myrule);
 
         /* clear element heap memory */
@@ -168,8 +190,6 @@ bool retrieveRulesFromDB(std::vector<Rule*>&ruleset, size_t ruleCount, char *pri
     /* clean up */
     data = startPos;
     free(data);
-    free(rule_size_list);
 
     return ruleset.size() > 0 ? true : false;
-
 }

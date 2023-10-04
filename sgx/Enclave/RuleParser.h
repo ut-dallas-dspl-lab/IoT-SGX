@@ -28,7 +28,7 @@
 #define	EVENT_KEY_DEVICEID          "deviceID"
 #define	EVENT_KEY_VALUE             "value"
 #define	EVENT_KEY_UNIT              "unit"
-#define	EVENT_KEY_TIMESTAMP         "timestamp"
+#define	EVENT_KEY_TIMESTAMP         "ts"
 
 /* Keywords Macros for Device info Parsing */
 #define	DEVICE_KEY_USERID           "userID"
@@ -49,5 +49,5 @@ RuleType parseRuleTypeAction(char *rule);
 bool parseRule(char *rule, RuleType type, Rule *myRule);
 bool parseDeviceEventData(char *event, DeviceEvent *deviceEvent);
 bool parseDeviceInfo(char *info, network *net);
-
+char* buildActionCommand(char *userID, char *deviceID, char *command);
 #endif //IOT_SGX_RULEPARSER_H

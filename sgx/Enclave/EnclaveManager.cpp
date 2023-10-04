@@ -18,6 +18,11 @@ void setupEnclave(){
     net = {0};
 }
 
+/**
+ * setupDeviceInfo:
+ *  Parse device information from json string and store in a Global Struct Network
+ *  @params: json string with device information
+ */
 int setupDeviceInfo(char *info){
     bool status = parseDeviceInfo(info, &net);
     if (!status){
@@ -35,6 +40,10 @@ int setupDeviceInfo(char *info){
 /* Device Info */
 /******************************************************/
 
+/**
+ * getNumSubscriptionTopics:
+ *  Returns the number of MQTT Sub topics.
+ */
 int getNumSubscriptionTopics(){
     int count = 0;
     for (int i = 0; i < net.n; ++i) {
@@ -43,6 +52,11 @@ int getNumSubscriptionTopics(){
     return count;
 }
 
+/**
+ * getSubscriptionTopicNames:
+ *  Returns the MQTT Sub topic names.
+ *  @params: a struct Message, the number of MQTT Sub topics.
+ */
 int getSubscriptionTopicNames(struct Message *msg, size_t num_topics){
     int count = 0;
     for (int i = 0; i < net.n; ++i) {
@@ -58,9 +72,29 @@ int getSubscriptionTopicNames(struct Message *msg, size_t num_topics){
     return 1;
 }
 
+/**
+ * getDeviceTopicName:
+ *  Returns the MQTT topic name for a given device ID
+ *  @params: device ID
+ */
+char *getDeviceTopicName(char *deviceID){
+    for (int i = 0; i < net.n; ++i){
+        if(obliviousStringCompare(deviceID, net.devices[i].deviceID)) {
+            return net.devices[i].mqtt_topic;
+        }
+    }
+    return NULL;
+}
+
 /******************************************************/
 /* Rule */
 /******************************************************/
+
+/**
+ * didReceiveRule:
+ *  Manages incoming Rules
+ *  @params: a struct Message containing the encrypted Rule
+ */
 int didReceiveRule(struct Message *msg){
     if(IS_DEBUG) printf("EnclaveManager:: didReceiveRule");
     size_t timeStart = 0;
@@ -75,7 +109,6 @@ int didReceiveRule(struct Message *msg){
     struct Rule *myrule;
     initRule(&myrule);
     bool isValid = isDecryptSuccess && startParsingRule(decMessage, myrule);
-    if (IS_DEBUG && isValid) printRuleInfo(myrule);
 
     /* conflict detection */
     if (IS_BENCHMARK) timeStart = ocallGetCurrentTime(MILLI);
@@ -104,6 +137,11 @@ int didReceiveRule(struct Message *msg){
 /* Event */
 /******************************************************/
 
+/**
+ * didReceiveEventMQTT:
+ *  Manages incoming device events
+ *  @params: a struct Message containing the encrypted event string
+ */
 void didReceiveEventMQTT(struct Message *msg) {
     if(IS_DEBUG) printf("EnclaveManager:: didReceiveEventMQTT");
 
@@ -123,11 +161,76 @@ void didReceiveEventMQTT(struct Message *msg) {
     bool isParsed = isDecryptionSuccess && !isEmptyEvent && parseDeviceEventData(decMessage, myEvent);
     if (IS_DEBUG && isParsed) printDeviceEventInfo(myEvent);
 
+    /* Verify timestamp: invalid event if its timestamp vary more than the Threshold from current timestamp */
+    bool isValidTimestamp = (msg->timestamp - atol(myEvent->timestamp)) <= TIMESTAMP_THRESHOLD_SEC;
+    if (IS_DEBUG && !isValidTimestamp) {
+        printf("current ts = %ld, event ts = %ld", msg->timestamp,  atol(myEvent->timestamp));
+        printf("EnclaveManager:: Invalid Timestamp!");
+    }
+
     /* Start rule automation */
-    if(isParsed) startRuleAutomation(myEvent);
+    if(isParsed && isValidTimestamp) startRuleAutomation(myEvent);
 
     /* cleanup */
     deleteDeviceEvent(&myEvent);
     free(decMessage);
     return;
+}
+
+
+/**
+ * sendDeviceCommands:
+ *  sends action-commands to respective devices according to the Action part of the Rule
+ *  @params: a Rule, a boolean indicating whether the rule is satisfied
+ *  returns: true if command sent successfully, else false
+ */
+int sendDeviceCommands(Rule *myRule, bool isRuleSatisfied){
+    TOTAL_DEVICE_COMMANDS += 1;
+    if (IS_DEBUG) printf("isRuleSatisfied = %d", isRuleSatisfied);
+
+    /* check if there is any 'else' response in the Rule */
+    bool isEmptyResponse = obliviousSelectEq(isRuleSatisfied, 0) && obliviousSelectEq(myRule->isElseExist, 0);
+    if (isEmptyResponse) return isRuleSatisfied;
+
+    /* initialize variables */
+    Message *response = (Message*) malloc(sizeof(Message));
+    response->isEncrypted = IS_ENCRYPTION_ENABLED;
+
+    char *deviceID = obliviousSelectEq(isRuleSatisfied, 1) ? myRule->action->deviceID : myRule->actionElse->deviceID;
+    char *userID = net.userID;
+
+    /* retrieve mqtt topic name */
+    int isValidTopicName = 0;
+    char *addr = getDeviceTopicName(deviceID);
+    isValidTopicName = addr != NULL ? 1 : 0;
+    int topicLen = strlen(addr);
+    response->address = (char*) malloc( (topicLen+1) * sizeof(char));
+    memcpy(response->address, addr, topicLen);
+    response->address[topicLen] = '\0';
+
+    /* make json response */
+    char *command = obliviousSelectEq(isRuleSatisfied, 1) ? myRule->responseCommand : myRule->responseCommandElse;
+    char *responseCommand = buildActionCommand(userID, deviceID, command);
+    if (IS_DEBUG) printf("responseCommand = %s", responseCommand);
+
+    /* encrypt the response */
+    int len = obliviousStringLength(responseCommand);
+    response->textLength = len+SGX_AESGCM_MAC_SIZE;
+    response->text = (char *) malloc(sizeof(char) * (response->textLength+1));
+    response->tag = NULL;
+    bool isEncryptionSuccess = encryptMessage_AES_GCM(responseCommand, len, response->text, response->textLength);
+
+    /* pass the response to the REE via ocall */
+    int isValidResponse = obliviousAndOperation(isEncryptionSuccess, isValidTopicName);
+    size_t isSuccess = 0;
+    if (obliviousSelectEq(isValidResponse,1)) ocall_send_rule_commands_mqtt(&isSuccess, response->address, response->text, response->textLength);
+    if (IS_DEBUG) isSuccess ? printf("RuleManager:: Successfully sent rule command to device!") : printf("RuleManager:: Failed to send rule command to device!");
+
+    //TODO: verify decryption
+    //char *dec_sample =  (char *) malloc(sizeof(char) * ((response->textLength - SGX_AESGCM_MAC_SIZE)+1));
+    //decryptMessage_AES_GCM(response->text, response->textLength, dec_sample, response->textLength - SGX_AESGCM_MAC_SIZE);
+
+    free(responseCommand);
+    deleteMessage(&response);
+    return isSuccess;
 }
