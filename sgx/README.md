@@ -45,4 +45,4 @@ Later, the SGX enclave receives encrypted trigger events from IoT devices, proce
     - Load the sample encrypted ruleset from file `sample_ruleset_v1_enc.json` into the MongoDB using *mongoimport* command:
       `mongoimport --db=IOT --collection=sample_ruleset_v1 --file=sample_ruleset_v1_enc.json`
 4. Lastly, run the SGX app that awaits for incoming trigger-events from registered IoT devices:
-    - Run using command: `./app sample_ruleset_v1 sample_device_info.json -r 0 -d 1`
+    - Run using command: `./app sample_ruleset_v1 datafiles/sample_device_info.json -r 0 -d 1`
