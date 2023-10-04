@@ -1,10 +1,4 @@
-/home/shihab/Downloads/CLion-2020.3.1/clion-2020.3.1/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/shihab/Downloads/CLion-2020.3.1/clion-2020.3.1/bin/ninja/linux/x64/ninja -G Ninja -S /home/shihab/optee_qemu_v8/optee_examples/iot -B /home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug
-CMake Warning (dev) at CMakeLists.txt:1 (project):
-  cmake_minimum_required() should be called prior to this top-level project()
-  call.  Please see the cmake-commands(7) manual for usage documentation of
-  both commands.
-This warning is for project developers.  Use -Wno-dev to suppress it.
-
+/home/msi/Downloads/CLion-2023.1.3/clion-2023.1.3/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/msi/optee_qemu_v8/optee_examples/iot -B /home/msi/optee_qemu_v8/optee_examples/iot/cmake-build-debug
 -- The C compiler identification is GNU 7.5.0
 -- Detecting C compiler ABI info
 -- Detecting C compiler ABI info - done
@@ -14,13 +8,13 @@ This warning is for project developers.  Use -Wno-dev to suppress it.
 CMake Warning (dev) in CMakeLists.txt:
   No cmake_minimum_required command is present.  A line of code such as
 
-    cmake_minimum_required(VERSION 3.26)
+    cmake_minimum_required(VERSION 3.25)
 
   should be added at the top of the file.  The version specified may be lower
   if you wish to support older CMake versions for this project.  For more
   information run "cmake --help-policy CMP0000".
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
--- Configuring done (1.6s)
--- Generating done (0.0s)
--- Build files have been written to: /home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/msi/optee_qemu_v8/optee_examples/iot/cmake-build-debug

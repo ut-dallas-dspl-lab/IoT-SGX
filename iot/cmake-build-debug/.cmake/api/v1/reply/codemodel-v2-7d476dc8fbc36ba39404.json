@@ -36,7 +36,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "optee_example_iot::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-optee_example_iot-Debug-4fadd8ea4f8f5720b4a1.json",
+					"jsonFile" : "target-optee_example_iot-Debug-a629f4282b8074520b13.json",
 					"name" : "optee_example_iot",
 					"projectIndex" : 0
 				}
@@ -46,12 +46,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug",
-		"source" : "/home/shihab/optee_qemu_v8/optee_examples/iot"
+		"build" : "/home/msi/optee_qemu_v8/optee_examples/iot/cmake-build-debug",
+		"source" : "/home/msi/optee_qemu_v8/optee_examples/iot"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 5
+		"minor" : 4
 	}
 }

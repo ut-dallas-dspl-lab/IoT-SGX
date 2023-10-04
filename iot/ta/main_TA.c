@@ -542,7 +542,7 @@ static TEE_Result decrypt_action_command_TA(void *session, uint32_t param_types,
     size_t action_command_size = params[0].memref.size; // this includes length + tag length
 
     size_t action_size_wo_tag = action_command_size - TA_AES_GCM_TAG_SIZE;
-    //IMSG("action_command=%d, action_size_wo_tag=%d", action_command_size,action_size_wo_tag);
+    IMSG("action_command=%d, action_size_wo_tag=%d", action_command_size,action_size_wo_tag);
 
     char *action_wo_tag = TEE_Malloc(action_size_wo_tag, 0);
     char *action_wo_tag_enc = TEE_Malloc(action_size_wo_tag, 0);
@@ -562,7 +562,7 @@ static TEE_Result decrypt_action_command_TA(void *session, uint32_t param_types,
         IMSG("ERROR! Decryption failed!");
         goto end;
     }
-    //IMSG("Done Decryption: %s", action_wo_tag);
+    IMSG("Done Decryption: %s", action_wo_tag);
 
     int device_type = -1, command_type = -1, argument_type=-1, argument_size=-1;
     char *argument = params[2].memref.buffer;

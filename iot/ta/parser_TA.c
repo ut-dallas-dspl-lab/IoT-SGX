@@ -125,24 +125,19 @@ int parse_device_info(char *info, network *net){
 }
 
 
-int parse_action_command(char *action, iot *event_properties, char **device_command, char **additional_arg, char **additional_arg_value){
+int parse_action_command(char *action, iot *event_properties, char **device_command, char **additional_arg, char **additional_arg_value, long *timestamp){
     int status = 0;
-    cJSON *action_json = cJSON_Parse(action);
+    cJSON *command_json = cJSON_Parse(action);
 
-    if (action_json == NULL)
+    if (command_json == NULL)
     {
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL) printf("Parser:: Error before: %s\n", error_ptr);
         goto end;
     }
 
-    const cJSON *command_json = cJSON_GetObjectItemCaseSensitive(action_json, "command");
-    if (!cJSON_IsObject(command_json) || cJSON_IsNull(command_json)) {
-        printf("Parser:: couldn't parse command!");
-        goto end;
-    }
-
-    const cJSON *deviceList = cJSON_GetObjectItem(command_json, "devices");
+    /* device ID */
+    const cJSON *deviceList = cJSON_GetObjectItem(command_json, ACTION_EVENT_KEY_DEVICES);
     if (!cJSON_IsArray(deviceList) || cJSON_IsNull(deviceList)){
         printf("Parser:: couldn't parse devices!");
         goto end;
@@ -155,8 +150,9 @@ int parse_action_command(char *action, iot *event_properties, char **device_comm
         break;
     }
 
+    /* command list */
     const cJSON *obj = NULL;
-    const cJSON *commandList = cJSON_GetObjectItem(command_json, "commands");
+    const cJSON *commandList = cJSON_GetObjectItem(command_json, ACTION_EVENT_KEY_COMMANDS);
     if (!cJSON_IsArray(commandList) || cJSON_IsNull(commandList)){
         printf("Parser:: couldn't parse commandList!");
         goto end;
@@ -167,7 +163,7 @@ int parse_action_command(char *action, iot *event_properties, char **device_comm
     }
 
     /* capability */
-    const cJSON *capability = cJSON_GetObjectItem(obj, "capability");
+    const cJSON *capability = cJSON_GetObjectItem(obj, ACTION_EVENT_KEY_CAPABILITY);
     if (!cJSON_IsString(capability) || (capability->valuestring == NULL)){
         printf("Parser:: couldn't parse capability!");
         goto end;
@@ -177,7 +173,7 @@ int parse_action_command(char *action, iot *event_properties, char **device_comm
     TEE_MemMove(event_properties->capability, capability->valuestring, strlen(capability->valuestring));
 
     /* command */
-    const cJSON *cmd = cJSON_GetObjectItem(obj, "command");
+    const cJSON *cmd = cJSON_GetObjectItem(obj, ACTION_EVENT_KEY_COMMAND);
     if (!cJSON_IsString(cmd) || (cmd->valuestring == NULL)){
         printf("Parser:: couldn't parse cmd!");
         goto end;
@@ -189,7 +185,7 @@ int parse_action_command(char *action, iot *event_properties, char **device_comm
     /* arguments */
     *additional_arg = NULL;
     *additional_arg_value = NULL;
-    const cJSON *argumentList = cJSON_GetObjectItem(obj, "arguments");
+    const cJSON *argumentList = cJSON_GetObjectItem(obj, ACTION_EVENT_KEY_ARGUMENTS);
     if (!cJSON_IsArray(argumentList) || cJSON_IsNull(argumentList)){
         printf("Parser:: couldn't parse arguments!");
         goto end;
@@ -206,13 +202,21 @@ int parse_action_command(char *action, iot *event_properties, char **device_comm
         break;
     }
 
+    /* timestamp */
+    const cJSON *ts = cJSON_GetObjectItem(command_json, EVENT_KEY_TIMESTAMP);
+    if (!cJSON_IsString(ts) || (ts->valuestring == NULL)){
+        printf("Parser:: couldn't parse timestamp!");
+        goto end;
+    }
+    *timestamp = (long) atod_ta(ts->valuestring);
+
+
     status = 1; // successful parsing
 
     end:
-    cJSON_Delete(action_json);
+    cJSON_Delete(command_json);
     return status;
 }
-
 
 int build_trigger_event(char **event_str, iot *device_prop, long ts){
     cJSON *event = cJSON_CreateObject();
@@ -222,7 +226,7 @@ int build_trigger_event(char **event_str, iot *device_prop, long ts){
     int status = 0;
 
     /* device ID */
-    if (cJSON_AddStringToObject(event, "deviceID", device_prop->deviceID) == NULL){
+    if (cJSON_AddStringToObject(event, EVENT_KEY_DEVICEID, device_prop->deviceID) == NULL){
         printf("Failed to add device ID.\n");
         goto end;
     }
@@ -234,7 +238,7 @@ int build_trigger_event(char **event_str, iot *device_prop, long ts){
         printf("Failed to add value.\n");
         goto end;
     }
-    cJSON_AddItemToObject(attribute, "value", value);
+    cJSON_AddItemToObject(attribute, EVENT_KEY_VALUE, value);
 
     /* unit */
     cJSON *unit = NULL;
@@ -243,16 +247,13 @@ int build_trigger_event(char **event_str, iot *device_prop, long ts){
         printf("Failed to add unit.\n");
         goto end;
     }
-    cJSON_AddItemToObject(attribute, "unit", unit);
+    cJSON_AddItemToObject(attribute, EVENT_KEY_UNIT, unit);
 
     /* timestamp */
-    cJSON *timestamp = NULL;
-    timestamp = cJSON_CreateNumber(ts);
-    if (timestamp == NULL){
-        printf("Failed to add timestamp.\n");
-        goto end;
-    }
-    cJSON_AddItemToObject(attribute, "timestamp", timestamp);
+    char ts_buffer[16];
+    snprintf(ts_buffer,16, "%ld", ts);
+    cJSON *timestamp = cJSON_CreateString(ts_buffer);
+    cJSON_AddItemToObject(attribute, EVENT_KEY_TIMESTAMP, timestamp);
 
     cJSON_AddItemToObject(capability, device_prop->attribute, attribute);
     cJSON_AddItemToObject(event, device_prop->capability, capability);

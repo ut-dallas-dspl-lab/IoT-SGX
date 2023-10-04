@@ -557,8 +557,9 @@ void on_subscribe(struct mosquitto *mosq, void *obj, int mid, int qos_count, con
 void on_message(struct mosquitto *mosq, void *obj, const struct mosquitto_message *msg)
 {
     /* This blindly prints the payload, but the payload can be anything so take care. */
-    printf("%s %d %d\n", msg->topic, msg->qos, msg->payloadlen);
+    printf("Received Message from: %s, qos=%d, length=%d\n", msg->topic, msg->qos, msg->payloadlen);
     char* payload = (char*) msg->payload;
+
     int payloadlen = msg->payloadlen;
     if (payloadlen > 0){
         received_action_command(payload, payloadlen);
@@ -637,10 +638,17 @@ int start_mosquitto(){
         /* TODO: Plug in code for fetching and publishing real sensor data */
         //get_rpi3_motion_sensor_data(mosq);
         get_simulated_motion_sensor_data(mosq);
-        get_simulated_temperature_sensor_data(mosq);
-    }else{
+        //get_simulated_temperature_sensor_data(mosq);
+    }else if(MQTT_OPERATION == TA_MQTT_OPERATION_SUBSCRIBE){
         printf("Starting MQTT Subscriber...\n");
         mosquitto_loop_forever(mosq, -1, 1); /* For subscriber */
+    }else{
+        printf("Starting MQTT Publisher & Subscriber...\n");
+        mosquitto_loop_start(mosq);
+        sleep(1);
+        get_simulated_temperature_sensor_data(mosq);
+        sleep(1);
+        get_simulated_motion_sensor_data(mosq);
     }
     mosquitto_lib_cleanup();
 }

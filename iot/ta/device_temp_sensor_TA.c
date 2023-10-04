@@ -37,7 +37,5 @@ int prepare_trigger_for_temperature_sensor(char *sensor_value, char **response, 
 
     build_trigger_event(response, device_properties, t.seconds);
 
-    //sprintf(TRIGGER_EVENT_BUFFER, TRIGGER_EVENT_TEMPLATE, device_properties->deviceID, device_properties->capability, device_properties->attribute, device_properties->value, t.seconds);
-    //TEE_MemMove((*response), TRIGGER_EVENT_BUFFER, strlen(TRIGGER_EVENT_BUFFER));
     return 1;
 }

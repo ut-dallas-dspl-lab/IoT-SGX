@@ -63,15 +63,15 @@
 			[
 				{
 					"backtrace" : 4,
-					"path" : "/home/shihab/optee_qemu_v8/optee_examples/iot/ta/include"
+					"path" : "/home/msi/optee_qemu_v8/optee_examples/iot/ta/include"
 				},
 				{
 					"backtrace" : 4,
-					"path" : "/home/shihab/optee_qemu_v8/optee_examples/iot/include"
+					"path" : "/home/msi/optee_qemu_v8/optee_examples/iot/include"
 				},
 				{
 					"backtrace" : 4,
-					"path" : "/home/shihab/optee_qemu_v8/optee_examples/iot/../../../host/aarch64-buildroot-linux-gnu/sysroot/usr/include"
+					"path" : "/home/msi/optee_qemu_v8/optee_examples/iot/../../../host/aarch64-buildroot-linux-gnu/sysroot/usr/include"
 				}
 			],
 			"language" : "C",
@@ -113,11 +113,15 @@
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-L/home/shihab/optee_qemu_v8/optee_examples/iot/../../../host/aarch64-buildroot-linux-gnu/sysroot/usr/lib",
+				"fragment" : "-L/home/msi/optee_qemu_v8/optee_examples/iot/../../../host/aarch64-buildroot-linux-gnu/sysroot/usr/lib",
 				"role" : "libraryPath"
 			},
 			{
-				"fragment" : "-Wl,-rpath,/home/shihab/optee_qemu_v8/optee_examples/iot/../../../host/aarch64-buildroot-linux-gnu/sysroot/usr/lib:",
+				"fragment" : "-L/home/msi/optee_qemu_v8/optee_examples/iot/../../../per-package/mosquitto/host/aarch64-buildroot-linux-gnu/sysroot/usr/lib",
+				"role" : "libraryPath"
+			},
+			{
+				"fragment" : "-Wl,-rpath,/home/msi/optee_qemu_v8/optee_examples/iot/../../../host/aarch64-buildroot-linux-gnu/sysroot/usr/lib:/home/msi/optee_qemu_v8/optee_examples/iot/../../../per-package/mosquitto/host/aarch64-buildroot-linux-gnu/sysroot/usr/lib:",
 				"role" : "libraries"
 			},
 			{
@@ -127,6 +131,14 @@
 			},
 			{
 				"fragment" : "-lmosquitto",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lcrypto",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lssl",
 				"role" : "libraries"
 			},
 			{

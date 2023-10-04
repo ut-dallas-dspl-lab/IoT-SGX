@@ -1,4 +1,4 @@
-# Install script for directory: /home/shihab/optee_qemu_v8/optee_examples/iot
+# Install script for directory: /home/msi/optee_qemu_v8/optee_examples/iot
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -49,12 +49,12 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/optee_example_iot"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug/optee_example_iot")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/msi/optee_qemu_v8/optee_examples/iot/cmake-build-debug/optee_example_iot")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/optee_example_iot" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/optee_example_iot")
     file(RPATH_CHANGE
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/optee_example_iot"
-         OLD_RPATH "/home/shihab/optee_qemu_v8/optee_examples/iot/../../../host/aarch64-buildroot-linux-gnu/sysroot/usr/lib:"
+         OLD_RPATH "/home/msi/optee_qemu_v8/optee_examples/iot/../../../host/aarch64-buildroot-linux-gnu/sysroot/usr/lib:/home/msi/optee_qemu_v8/optee_examples/iot/../../../per-package/mosquitto/host/aarch64-buildroot-linux-gnu/sysroot/usr/lib:"
          NEW_RPATH "")
     if(CMAKE_INSTALL_DO_STRIP)
       execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/optee_example_iot")
@@ -70,5 +70,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/shihab/optee_qemu_v8/optee_examples/iot/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/msi/optee_qemu_v8/optee_examples/iot/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

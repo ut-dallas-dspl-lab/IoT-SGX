@@ -194,13 +194,25 @@ int prepare_action_command(char *action, int *device_type, int *command_type, in
     char *device_command = NULL;
     char *additional_arg = NULL;
     char *additional_arg_value = NULL;
+    long timestamp = 0;
 
     /* Parse action command json */
-    int isSuccess = parse_action_command(action, event_prop, &device_command, &additional_arg, &additional_arg_value);
+    int isSuccess = parse_action_command(action, event_prop, &device_command, &additional_arg, &additional_arg_value, &timestamp);
     if(!isSuccess) {
         goto end;
     }
     printf("deviceID=%s, device_capability=%s, device_command=%s\n", event_prop->deviceID, event_prop->capability, device_command);
+
+    /* Verify timestamp: invalid event if its timestamp vary more than the Threshold from current timestamp */
+    TEE_Time current_ts;
+    TEE_GetREETime(&current_ts);
+    printf("current ts = %ld, event ts = %ld, ts diff = %ld\n", current_ts.seconds, timestamp, (long)current_ts.seconds - timestamp);
+    if(((long)current_ts.seconds - timestamp) > TIMESTAMP_THRESHOLD_SEC){
+        printf("Invalid timestamp! Discarding the event...\n");
+        isSuccess = 0;
+        goto end;
+    }
+
 
     /* Fetch stored device specific information */
     iot *device_info = NULL;

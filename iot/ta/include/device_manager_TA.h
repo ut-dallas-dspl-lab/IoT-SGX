@@ -2,6 +2,10 @@
 #define OPTEE_EXAMPLE_IOT_DEVICE_MANAGER_TA_H
 
 
+#define TIMESTAMP_THRESHOLD_MILLI 1000
+#define TIMESTAMP_THRESHOLD_SEC 10
+
+
 int prepare_device_info(char *info);
 int get_num_subscriber_devices();
 int get_subscriber_topic(int sub_topic_index, char** topic_name);
