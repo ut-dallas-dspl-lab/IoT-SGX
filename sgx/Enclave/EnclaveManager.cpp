@@ -226,10 +226,6 @@ int sendDeviceCommands(Rule *myRule, bool isRuleSatisfied){
     if (obliviousSelectEq(isValidResponse,1)) ocall_send_rule_commands_mqtt(&isSuccess, response->address, response->text, response->textLength);
     if (IS_DEBUG) isSuccess ? printf("RuleManager:: Successfully sent rule command to device!") : printf("RuleManager:: Failed to send rule command to device!");
 
-    //TODO: verify decryption
-    //char *dec_sample =  (char *) malloc(sizeof(char) * ((response->textLength - SGX_AESGCM_MAC_SIZE)+1));
-    //decryptMessage_AES_GCM(response->text, response->textLength, dec_sample, response->textLength - SGX_AESGCM_MAC_SIZE);
-
     free(responseCommand);
     deleteMessage(&response);
     return isSuccess;
