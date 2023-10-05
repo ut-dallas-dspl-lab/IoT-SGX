@@ -13,7 +13,9 @@ The overall flow of the process is outlined below:
 2. Rule Registration: The client registers rules (in trigger-action format) in the cloud server's SGX via secure channel after remote attestation. The rules are encrypted, stored in the cloud filesystem/database, processed against incoming data stream from the IoT devices to carry out the defined automation.
 3. IoT to Server Data Transmission: IoT devices capture data from the environment and send it to the untrusted cloud server after encrypting the payload in the TrustZone. 
 4. Rule Automation in Server: In the cloud, SGX securely processes the received data after decryption of the payload in the enclave against the registered rules. SGX sends encrypted responses, when required for automation purposes according to the rules, to the particular IoT device. 
-5. IoT Device Automation: The IoT devices process the response after decryption in the TrustZone. 
+5. IoT Device Automation: The IoT devices process the response after decryption in the TrustZone.
+
+For more information, please visit our website.
 
 ## Implementation
 - `sgx` directory contains the SGX code for the cloud.
