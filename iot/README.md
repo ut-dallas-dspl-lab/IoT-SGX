@@ -29,7 +29,8 @@ You need to provide a json file that contains your basic device information. We 
 # Installation #
 1. Install OP-TEE (Rpi3/Qemu). For more information, see [OP-TEE documentation](https://optee.readthedocs.io/en/latest).
 2. Install required packages mentioned above.
-2. Clone this repo in the `<optee_project_dir>/optee_examples` folder.
+3. Clone this repo in the `<optee_project_dir>/optee_examples` folder.
+4. Make necessary changes to library paths in CMakeLists.txt 
 
 
 # Build #
@@ -41,8 +42,8 @@ You need to provide a json file that contains your basic device information. We 
 
 # Run #
 1. Login with password `root`
-2. To run the app, use command: `optee_example_iot <device info file path>`
-      - For example: `optee_example_iot sample_device_info.json`
+2. To run the app, use command: `optee_example_iot <device info file path> <pub/sub mode>`
+      - For example, run the app in both publish and subscribe mode: `optee_example_iot sample_device_info.json -op 2`
       - See the `main.c` for more information.
 
 
