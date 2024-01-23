@@ -15,7 +15,7 @@ The overall flow of the process is outlined below:
 4. Rule Automation in Server: In the cloud, SGX securely processes the received data after decryption of the payload in the enclave against the registered rules. SGX sends encrypted responses, when required for automation purposes according to the rules, to the particular IoT device. 
 5. IoT Device Automation: The IoT devices process the response after decryption in the TrustZone.
 
-For more information, please visit our [website](https://mahmoudzamani.github.io/SECIOTT-ConfidentialComputing/).
+For more information, please visit our [website](https://personal.utdallas.edu/~mxk055100/SECIOTT-ConfidentialComputing/).
 
 ## Implementation
 - `sgx` directory contains the SGX code for the cloud.
